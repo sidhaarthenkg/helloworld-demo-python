@@ -12,18 +12,25 @@ jobs:
     steps:
       - name: Code Checkout
         uses: actions/checkout@v6
+        
       - name: Build image
         run: docker build -t ${{vars.DOCKER_USERNAME }}/helloworld-demo-python:vj .
+        
       - name: Verify the image 
         run: docker images
+        
       - name: Create Container 
         run: docker run --name pythonContainer -itd -p 8080:8080 ${{vars.DOCKER_USERNAME }}/helloworld-demo-python:vj
+        
       - name: Waiting Time
         run: sleep 20
+        
       - name: View Container        
         run: docker ps
+        
       - name: Check output
         run: curl -f http://localhost:8080
+        
       - name: Docker login 
         uses: docker/login-action@v3.6.0
         with:
@@ -32,6 +39,40 @@ jobs:
  
       - name: Push the image
         run: docker push ${{vars.DOCKER_USERNAME }}/helloworld-demo-python:vj
+        
       - name: Docket cleanup
         run: docker rm -f pythonContainer
+
+  k8scd-job:
+   needs: dockerci-job
+   runs-on: ubuntu-latest
+   steps:
+     - name: Code Checkout
+       uses: actions/checkout@v6
+
+     - name: start minikube
+       uses: medyagh/setup-minikube@latest
+
+     - name: Test minikube
+       run: kubectl get pods -A 
+
+     - name: apply-yaml-files
+       run: |
+         kubectl apply -f k8s/.
+         kubectl config set-context --current --namespace=ns-pythonapp
+         kubectl wait --for=condition=ready pod -l app=hello-world
+
+     - name: get-status-deployments
+       run: |
+         kubectl get ns
+         kubectl get deploy,service -n ns-pythonapp
+
+     - name: Test service URLs
+       run: |
+          minikube service list
+          minikube service my-newservice --url
+          echo -n "------------------opening the service------------------"
+          curl -f $(minikube service my-newservice --url)/version
+
+      
  
