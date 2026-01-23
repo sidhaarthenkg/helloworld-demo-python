@@ -59,13 +59,13 @@ jobs:
      - name: apply-yaml-files
        run: |
          kubectl apply -f k8s/.
-         kubectl config set-context --current --namespace=ns-pythonapp
+         kubectl config set-context --current --namespace=pythonapp
          kubectl wait --for=condition=ready pod -l app=hello-world
 
      - name: get-status-deployments
        run: |
          kubectl get ns
-         kubectl get deploy,service -n ns-pythonapp
+         kubectl get deploy,service -n pythonapp
 
      - name: Test service URLs
        run: |
