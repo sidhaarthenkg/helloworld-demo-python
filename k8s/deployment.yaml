@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world
+  namespace: ns-pythonapp
+  labels:
+    app: hello-world
+spec:
+  replicas: 7
+  selector:
+    matchLabels:
+      app: hello-world
+  template:
+    metadata:
+      labels:
+        app: hello-world
+    spec:
+      containers:
+      - name: hello-world
+        image: sidhaarthen/helloworld-demo-python:vj
+        ports:
+        - containerPort: 8080
